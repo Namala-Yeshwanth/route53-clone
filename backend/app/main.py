@@ -1,0 +1,25 @@
+from fastapi import FastAPI
+
+from app.api.hosted_zones import router as zone_router
+
+from app.core.exception_handlers import (
+    register_exception_handlers
+)
+
+from app.api.dns_records import router as dns_record_router
+
+app = FastAPI(
+    title="Route53 Clone API",
+    version="1.0.0"
+)
+
+register_exception_handlers(app)
+
+app.include_router(zone_router)
+app.include_router(dns_record_router)
+
+@app.get("/")
+def root():
+    return {
+        "message": "Route53 Clone API"
+    }
