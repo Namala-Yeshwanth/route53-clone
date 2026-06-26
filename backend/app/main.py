@@ -8,9 +8,11 @@ from app.core.exception_handlers import (
 
 from app.api.dns_records import router as dns_record_router
 
+from app.core.config import settings
+
 app = FastAPI(
-    title="Route53 Clone API",
-    version="1.0.0"
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION
 )
 
 register_exception_handlers(app)
