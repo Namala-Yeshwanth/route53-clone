@@ -8,10 +8,20 @@ from app.schemas.hosted_zone import (
     HostedZoneUpdate
 )
 
+from app.schemas.query_params import (
+    QueryParams
+)
+
+from app.core.dependencies import (
+    get_query_params
+)
 
 from app.services.hosted_zone_service import (
     HostedZoneService
 )
+
+from fastapi import status, Query
+from fastapi.responses import Response
 
 router = APIRouter(
     prefix="/zones",
@@ -24,16 +34,28 @@ router = APIRouter(
     response_model=list[HostedZoneResponse]
 )
 def list_zones(
+
+    query: QueryParams = Depends(
+        get_query_params
+    ),
+
     service: HostedZoneService = Depends(
         get_hosted_zone_service
     )
 ):
-    return service.list_zones()
+
+    return service.list_zones(
+        page=query.page,
+        size=query.size,
+        search=query.search,
+        sort=query.sort
+    )
 
 
 @router.post(
     "/",
-    response_model=HostedZoneResponse
+    response_model=HostedZoneResponse,
+    status_code=status.HTTP_201_CREATED
 )
 def create_zone(
     data: HostedZoneCreate,
@@ -78,7 +100,8 @@ def update_zone(
     )
 
 @router.delete(
-    "/{zone_id}"
+    "/{zone_id}",
+    status_code=status.HTTP_204_NO_CONTENT
 )
 def delete_zone(
     zone_id: int,
@@ -86,10 +109,8 @@ def delete_zone(
         get_hosted_zone_service
     )
 ):
-    service.delete_zone(
-        zone_id
-    )
+    service.delete_zone(zone_id)
 
-    return {
-        "message": "Hosted Zone deleted"
-    }
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT
+    )

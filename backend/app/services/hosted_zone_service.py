@@ -7,6 +7,8 @@ from app.core.exceptions import (
     DuplicateHostedZoneException
 )
 
+from app.core.pagination import paginate
+
 class HostedZoneService:
 
     def __init__(
@@ -15,9 +17,25 @@ class HostedZoneService:
     ):
         self.repository = repository
 
-    def list_zones(self):
+    def list_zones(
+        self,
+        page: int,
+        size: int,
+        search: str | None = None,
+        sort: str | None = None
+    ):
 
-        return self.repository.get_all()
+        offset, limit = paginate(
+            page,
+            size
+        )
+
+        return self.repository.get_all(
+            offset,
+            limit,
+            search,
+            sort
+        )
 
     def create_zone(
         self,

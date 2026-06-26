@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import Response
 
 from app.schemas.dns_record import (
     DNSRecordCreate,
@@ -19,9 +20,11 @@ router = APIRouter(
     tags=["DNS Records"]
 )
 
+
 @router.post(
     "/",
-    response_model=DNSRecordResponse
+    response_model=DNSRecordResponse,
+    status_code=status.HTTP_201_CREATED
 )
 def create_record(
     hosted_zone_id: int,
@@ -30,7 +33,6 @@ def create_record(
         get_dns_record_service
     )
 ):
-
     return service.create_record(
         hosted_zone_id=hosted_zone_id,
         record_name=data.record_name,
@@ -39,6 +41,7 @@ def create_record(
         ttl=data.ttl,
         priority=data.priority
     )
+
 
 @router.get(
     "/",
@@ -53,6 +56,7 @@ def list_records(
     return service.list_records(
         hosted_zone_id
     )
+
 
 @router.get(
     "/{record_id}",
@@ -69,6 +73,7 @@ def get_record(
         hosted_zone_id,
         record_id
     )
+
 
 @router.put(
     "/{record_id}",
@@ -92,8 +97,10 @@ def update_record(
         priority=data.priority
     )
 
+
 @router.delete(
-    "/{record_id}"
+    "/{record_id}",
+    status_code=status.HTTP_204_NO_CONTENT
 )
 def delete_record(
     hosted_zone_id: int,
@@ -107,6 +114,6 @@ def delete_record(
         record_id=record_id
     )
 
-    return {
-        "message": "DNS Record deleted"
-    }
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT
+    )

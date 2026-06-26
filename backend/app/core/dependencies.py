@@ -1,5 +1,11 @@
 from app.database.session import SessionLocal
 
+from fastapi import Query
+
+from app.schemas.query_params import (
+    QueryParams
+)
+
 def get_db():
     db = SessionLocal()
     try:
@@ -59,4 +65,35 @@ def get_dns_record_service(
     return DNSRecordService(
         dns_repository,
         hosted_zone_repository
+    )
+
+def get_query_params(
+
+    page: int = Query(
+        default=1,
+        ge=1
+    ),
+
+    size: int = Query(
+        default=20,
+        ge=1,
+        le=100
+    ),
+
+    search: str | None = Query(
+        default=None
+    ),
+
+    sort: str | None = Query(
+        default=None,
+        description="Sort field. Prefix with '-' for descending."
+    )
+
+):
+
+    return QueryParams(
+        page=page,
+        size=size,
+        search=search,
+        sort=sort
     )
