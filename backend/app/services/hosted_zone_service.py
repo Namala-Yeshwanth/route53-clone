@@ -8,6 +8,7 @@ from app.core.exceptions import (
 )
 
 from app.core.pagination import paginate
+from app.models.hosted_zone import HostedZone
 
 class HostedZoneService:
 
@@ -39,6 +40,7 @@ class HostedZoneService:
 
     def create_zone(
         self,
+        user_id: int,
         zone_name: str,
         description: str | None
     ):
@@ -52,9 +54,14 @@ class HostedZoneService:
         if existing_zone:
             raise DuplicateHostedZoneException()
 
+        zone = HostedZone(
+            user_id=user_id,
+            zone_name=zone_name,
+            description=description
+        )
+
         return self.repository.create(
-            zone_name,
-            description
+            zone
         )
 
     def get_zone(

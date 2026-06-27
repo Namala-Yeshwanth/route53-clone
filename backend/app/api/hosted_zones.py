@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from app.core.dependencies import get_hosted_zone_service
+from app.core.dependencies import get_hosted_zone_service, get_current_user
+from app.models.user import User
 
 from app.schemas.hosted_zone import (
     HostedZoneCreate,
@@ -59,13 +60,20 @@ def list_zones(
 )
 def create_zone(
     data: HostedZoneCreate,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: HostedZoneService = Depends(
         get_hosted_zone_service
     )
 ):
+
     return service.create_zone(
-        data.zone_name,
-        data.description
+        user_id=current_user.id,
+        zone_name=data.zone_name,
+        description=data.description
     )
 
 @router.get(

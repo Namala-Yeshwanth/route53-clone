@@ -8,3 +8,5 @@
 # Base.metadata.create_all(bind=engine)
 
 # print("Database tables created")
+
+from app.models.user import User
