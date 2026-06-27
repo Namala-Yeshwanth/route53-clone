@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 
 from app.core.dependencies import get_hosted_zone_service, get_current_user
-from app.models.user import User
 
 from app.schemas.hosted_zone import (
     HostedZoneCreate,
@@ -13,16 +12,18 @@ from app.schemas.query_params import (
     QueryParams
 )
 
-from app.core.dependencies import (
-    get_query_params
-)
-
 from app.services.hosted_zone_service import (
     HostedZoneService
 )
 
 from fastapi import status, Query
 from fastapi.responses import Response
+
+from app.models.user import User
+
+from app.core.dependencies import (
+    get_current_user
+)
 
 router = APIRouter(
     prefix="/zones",
@@ -36,8 +37,27 @@ router = APIRouter(
 )
 def list_zones(
 
-    query: QueryParams = Depends(
-        get_query_params
+    page: int = Query(
+        default=1,
+        ge=1
+    ),
+
+    size: int = Query(
+        default=20,
+        ge=1,
+        le=100
+    ),
+
+    search: str | None = Query(
+        default=None
+    ),
+
+    sort: str | None = Query(
+        default=None
+    ),
+
+    current_user: User = Depends(
+        get_current_user
     ),
 
     service: HostedZoneService = Depends(
@@ -46,12 +66,12 @@ def list_zones(
 ):
 
     return service.list_zones(
-        page=query.page,
-        size=query.size,
-        search=query.search,
-        sort=query.sort
+        user_id=current_user.id,
+        page=page,
+        size=size,
+        search=search,
+        sort=sort
     )
-
 
 @router.post(
     "/",
@@ -82,12 +102,18 @@ def create_zone(
 )
 def get_zone(
     zone_id: int,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: HostedZoneService = Depends(
         get_hosted_zone_service
     )
 ):
     return service.get_zone(
-        zone_id
+        zone_id,
+        current_user.id
     )
     
 @router.put(
@@ -97,14 +123,20 @@ def get_zone(
 def update_zone(
     zone_id: int,
     data: HostedZoneUpdate,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: HostedZoneService = Depends(
         get_hosted_zone_service
     )
 ):
     return service.update_zone(
-        zone_id,
-        data.zone_name,
-        data.description
+        zone_id=zone_id,
+        user_id=current_user.id,
+        zone_name=data.zone_name,
+        description=data.description
     )
 
 @router.delete(
@@ -113,11 +145,19 @@ def update_zone(
 )
 def delete_zone(
     zone_id: int,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: HostedZoneService = Depends(
         get_hosted_zone_service
     )
 ):
-    service.delete_zone(zone_id)
+    service.delete_zone(
+        zone_id,
+        current_user.id
+    )
 
     return Response(
         status_code=status.HTTP_204_NO_CONTENT

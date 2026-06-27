@@ -20,14 +20,20 @@ class HostedZoneRepository(
 
     def get_all(
         self,
+        user_id: int,
         offset: int,
         limit: int,
         search: str | None = None,
         sort: str | None = None
     ):
 
-        query = self.db.query(
-            HostedZone
+        query = (
+            self.db.query(
+                HostedZone
+            )
+            .filter(
+                HostedZone.user_id == user_id
+            )
         )
 
         if search:
@@ -69,12 +75,14 @@ class HostedZoneRepository(
     def update(
         self,
         zone_id: int,
+        user_id: int,
         zone_name: str,
         description: str | None
     ):
 
-        zone = self.get_by_id(
-            zone_id
+        zone = self.get_by_id_and_user(
+            zone_id,
+            user_id
         )
 
         if not zone:
@@ -90,11 +98,13 @@ class HostedZoneRepository(
 
     def delete(
         self,
-        zone_id: int
+        zone_id: int,
+        user_id: int
     ):
 
-        zone = self.get_by_id(
-            zone_id
+        zone = self.get_by_id_and_user(
+            zone_id,
+            user_id
         )
 
         if not zone:
@@ -116,6 +126,22 @@ class HostedZoneRepository(
             )
             .filter(
                 HostedZone.zone_name == zone_name
+            )
+            .first()
+        )
+    
+    def get_by_id_and_user(
+        self,
+        zone_id: int,
+        user_id: int
+    ):
+        return (
+            self.db.query(
+                HostedZone
+            )
+            .filter(
+                HostedZone.id == zone_id,
+                HostedZone.user_id == user_id
             )
             .first()
         )

@@ -6,6 +6,7 @@ from app.core.exceptions import (
     HostedZoneNotFoundException,
     DNSRecordNotFoundException,
     DuplicateHostedZoneException,
+    DuplicateDNSRecordException,
     InvalidDNSRecordException,
     UserAlreadyExistsException,
     InvalidCredentialsException
@@ -58,6 +59,21 @@ def register_exception_handlers(
             }
         )
 
+    @app.exception_handler(
+        DuplicateDNSRecordException
+    )
+    async def duplicate_dns_record(
+        request: Request,
+        exc: DuplicateDNSRecordException
+    ):
+
+        return JSONResponse(
+            status_code=409,
+            content={
+                "detail": "DNS Record already exists"
+            }
+        )
+    
     @app.exception_handler(
         InvalidDNSRecordException
     )

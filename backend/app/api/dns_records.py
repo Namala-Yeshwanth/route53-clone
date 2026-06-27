@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import Response
 
+from app.models.user import User
+
 from app.schemas.dns_record import (
     DNSRecordCreate,
     DNSRecordUpdate,
@@ -12,7 +14,8 @@ from app.services.dns_record_service import (
 )
 
 from app.core.dependencies import (
-    get_dns_record_service
+    get_dns_record_service,
+    get_current_user
 )
 
 router = APIRouter(
@@ -29,11 +32,17 @@ router = APIRouter(
 def create_record(
     hosted_zone_id: int,
     data: DNSRecordCreate,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: DNSRecordService = Depends(
         get_dns_record_service
     )
 ):
     return service.create_record(
+        user_id=current_user.id,
         hosted_zone_id=hosted_zone_id,
         record_name=data.record_name,
         record_type=data.record_type,
@@ -49,12 +58,18 @@ def create_record(
 )
 def list_records(
     hosted_zone_id: int,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: DNSRecordService = Depends(
         get_dns_record_service
     )
 ):
     return service.list_records(
-        hosted_zone_id
+        user_id=current_user.id,
+        hosted_zone_id=hosted_zone_id
     )
 
 
@@ -65,13 +80,19 @@ def list_records(
 def get_record(
     hosted_zone_id: int,
     record_id: int,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: DNSRecordService = Depends(
         get_dns_record_service
     )
 ):
     return service.get_record(
-        hosted_zone_id,
-        record_id
+        user_id=current_user.id,
+        hosted_zone_id=hosted_zone_id,
+        record_id=record_id
     )
 
 
@@ -83,11 +104,17 @@ def update_record(
     hosted_zone_id: int,
     record_id: int,
     data: DNSRecordUpdate,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: DNSRecordService = Depends(
         get_dns_record_service
     )
 ):
     return service.update_record(
+        user_id=current_user.id,
         hosted_zone_id=hosted_zone_id,
         record_id=record_id,
         record_name=data.record_name,
@@ -105,11 +132,17 @@ def update_record(
 def delete_record(
     hosted_zone_id: int,
     record_id: int,
+
+    current_user: User = Depends(
+        get_current_user
+    ),
+
     service: DNSRecordService = Depends(
         get_dns_record_service
     )
 ):
     service.delete_record(
+        user_id=current_user.id,
         hosted_zone_id=hosted_zone_id,
         record_id=record_id
     )

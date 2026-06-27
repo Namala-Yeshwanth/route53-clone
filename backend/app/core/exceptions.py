@@ -28,3 +28,8 @@ class InvalidCredentialsException(
     Exception
 ):
     pass
+
+class DuplicateDNSRecordException(
+    Exception
+):
+    pass

@@ -20,6 +20,7 @@ class HostedZoneService:
 
     def list_zones(
         self,
+        user_id: int,
         page: int,
         size: int,
         search: str | None = None,
@@ -32,6 +33,7 @@ class HostedZoneService:
         )
 
         return self.repository.get_all(
+            user_id,
             offset,
             limit,
             search,
@@ -66,11 +68,13 @@ class HostedZoneService:
 
     def get_zone(
         self,
-        zone_id: int
+        zone_id: int,
+        user_id: int
     ):
 
-        zone = self.repository.get_by_id(
-            zone_id
+        zone = self.repository.get_by_id_and_user(
+            zone_id,
+            user_id
         )
 
         if not zone:
@@ -81,6 +85,7 @@ class HostedZoneService:
     def update_zone(
         self,
         zone_id: int,
+        user_id: int,
         zone_name: str,
         description: str | None
     ):
@@ -98,6 +103,7 @@ class HostedZoneService:
             raise DuplicateHostedZoneException()
         zone = self.repository.update(
             zone_id,
+            user_id,
             zone_name,
             description
         )
@@ -109,10 +115,12 @@ class HostedZoneService:
     
     def delete_zone(
         self,
-        zone_id: int
+        zone_id: int,
+        user_id: int
     ):
         zone = self.repository.delete(
-            zone_id
+            zone_id,
+            user_id
         )
 
         if not zone:

@@ -14,6 +14,7 @@ from app.services.auth_service import (
 from app.core.dependencies import (
     get_auth_service
 )
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(
     prefix="/auth",
@@ -45,7 +46,7 @@ def register(
 )
 def login(
 
-    data: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
 
     service: AuthService = Depends(
         get_auth_service
@@ -53,5 +54,6 @@ def login(
 ):
 
     return service.login(
-        data
+        email=form_data.username,
+        password=form_data.password
     )

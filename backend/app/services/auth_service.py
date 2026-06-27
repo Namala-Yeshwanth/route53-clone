@@ -5,8 +5,7 @@ from app.repositories.user_repository import (
 )
 
 from app.schemas.user import (
-    UserCreate,
-    UserLogin
+    UserCreate
 )
 
 from app.security.hashing import (
@@ -60,18 +59,19 @@ class AuthService:
     
     def login(
         self,
-        data: UserLogin
+        email: str,
+        password: str
     ):
 
         user = self.repository.get_by_email(
-            data.email
+            email
         )
 
         if not user:
             raise InvalidCredentialsException()
 
         if not verify_password(
-            data.password,
+            password,
             user.password_hash
         ):
             raise InvalidCredentialsException()
